@@ -4,131 +4,139 @@
 console.log("Camp-helf JS Loaded Successfully");
 
 //---------------------------------------------
-// NAVIGATION (Optional Enhancements)
-//---------------------------------------------
-// Could be used later for dynamic page loading or animations
-
-//---------------------------------------------
 // EVENTS PAGE: Fetch Events from a Public API
 //---------------------------------------------
-// Placeholder fetch using a dummy API for now
-
 async function loadEvents() {
-  const eventContainer = document.getElementById("event-list");
-  if (!eventContainer) return;
+    const eventContainer = document.getElementById("eventsContainer");
+    if (!eventContainer) return;
 
-  try {
-    // Placeholder API (replace with actual events API)
-    const response = await fetch("https://api.sampleapis.com/futurama/episodes");
-    const data = await response.json();
+    try {
+        // Placeholder API (replace with actual events API)
+        const response = await fetch("https://api.sampleapis.com/futurama/episodes");
+        const data = await response.json();
 
-    // Limit to first 6 results
-    const events = data.slice(0, 6);
+        const events = data.slice(0, 6);
+        eventContainer.innerHTML = "";
 
-    eventContainer.innerHTML = ""; // Reset container
-
-    events.forEach((event) => {
-      const card = document.createElement("div");
-      card.className = "card-custom";
-      card.innerHTML = `
-        <h3>${event.title}</h3>
-        <p>${event.desc || "No description available."}</p>
-        <button class="save-btn">Add to Calendar</button>
-      `;
-      eventContainer.appendChild(card);
-    });
-  } catch (error) {
-    console.error("Events API error:", error);
-  }
+        events.forEach(event => {
+            const card = document.createElement("div");
+            card.className = "col-md-4";
+            card.innerHTML = `
+                <div class="card card-custom">
+                    <h5 class="card-title">${event.title}</h5>
+                    <p class="card-text">${event.desc || 'No description available.'}</p>
+                    <button class="save-btn">Add to Calendar</button>
+                </div>
+            `;
+            eventContainer.appendChild(card);
+        });
+    } catch (error) {
+        console.error("Events API error:", error);
+    }
 }
 
 //---------------------------------------------
-// DINING PAGE: Placeholder for Food Menu API
+// DINING PAGE: Display Menu Cards
 //---------------------------------------------
-async function loadMenu() {
-  const menuContainer = document.getElementById("menu-list");
-  if (!menuContainer) return;
+function loadMenu() {
+    const menuContainer = document.getElementById("menuContainer");
+    if (!menuContainer) return;
 
-  try {
-    const response = await fetch("https://api.sampleapis.com/coffee/hot");
-    const data = await response.json();
+    const menuItems = {
+        'Entrees': ['Pizza', 'Burger', 'Mango'],
+        'Drinks': ['Coke', 'Shake', 'Fanta'],
+        'Dessert': ['Muffin', 'Sorbet', 'Pie']
+    };
 
-    const items = data.slice(0, 5);
+    menuContainer.innerHTML = "";
 
-    items.forEach((item) => {
-      const card = document.createElement("div");
-      card.className = "card-custom";
-      card.innerHTML = `
-        <h3>${item.title}</h3>
-        <p>${item.description || "Delicious campus meal option."}</p>
-      `;
-      menuContainer.appendChild(card);
-    });
-  } catch (error) {
-    console.error("Menu API error:", error);
-  }
+    for (const category in menuItems) {
+        menuItems[category].forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'col-md-4';
+            card.innerHTML = `
+                <div class='card card-custom'>
+                    <h5 class='card-title'>${item}</h5>
+                    <p class='card-text'>Category: ${category}</p>
+                </div>
+            `;
+            menuContainer.appendChild(card);
+        });
+    }
 }
 
 //---------------------------------------------
 // MAP PAGE: Initialize Leaflet Map
 //---------------------------------------------
 function initMap() {
-  const mapElement = document.getElementById("campus-map");
-  if (!mapElement) return; // Only run on map page
+    const mapElement = document.getElementById("campusMap");
+    if (!mapElement) return;
 
-  // Create map
-  const map = L.map("campus-map").setView([41.8781, -87.6298], 14);
+    const map = L.map("campusMap").setView([41.8781, -87.6298], 15);
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-  }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
 
-  // Sample marker
-  L.marker([41.8781, -87.6298]).addTo(map).bindPopup("Campus Center");
+    const buildings = [
+        {name: 'Main Library', coords: [41.8785, -87.6298]},
+        {name: 'Student Center', coords: [41.8780, -87.6285]},
+        {name: 'Dining Hall', coords: [41.8775, -87.6305]},
+        {name: 'Engineering Building', coords: [41.8790, -87.6290]}
+    ];
+
+    buildings.forEach(b => {
+        L.marker(b.coords).addTo(map).bindPopup(`<b>${b.name}</b>`);
+    });
 }
 
 //---------------------------------------------
 // PROFILE PAGE: Save User Info to Local Storage
 //---------------------------------------------
 function saveProfile() {
-  const nameField = document.getElementById("profile-name");
-  const emailField = document.getElementById("profile-email");
+    const nameField = document.getElementById("name");
+    const emailField = document.getElementById("email");
+    const preferencesField = document.getElementById("preferences");
 
-  if (!nameField || !emailField) return;
+    if (!nameField || !emailField) return;
 
-  const profile = {
-    name: nameField.value,
-    email: emailField.value,
-  };
+    const profile = {
+        name: nameField.value,
+        email: emailField.value,
+        preferences: preferencesField.value
+    };
 
-  localStorage.setItem("camphelfProfile", JSON.stringify(profile));
-  alert("Profile saved!");
+    localStorage.setItem("camphelfProfile", JSON.stringify(profile));
+    const message = document.getElementById("profileMessage");
+    if (message) message.style.display = 'block';
 }
 
 function loadProfile() {
-  const saved = localStorage.getItem("camphelfProfile");
-  if (!saved) return;
+    const saved = localStorage.getItem("camphelfProfile");
+    if (!saved) return;
 
-  const profile = JSON.parse(saved);
+    const profile = JSON.parse(saved);
+    const nameField = document.getElementById("name");
+    const emailField = document.getElementById("email");
+    const preferencesField = document.getElementById("preferences");
 
-  const nameField = document.getElementById("profile-name");
-  const emailField = document.getElementById("profile-email");
-
-  if (nameField) nameField.value = profile.name;
-  if (emailField) emailField.value = profile.email;
+    if (nameField) nameField.value = profile.name;
+    if (emailField) emailField.value = profile.email;
+    if (preferencesField) preferencesField.value = profile.preferences;
 }
 
 //---------------------------------------------
-// PAGE INITIALIZATION
+// INITIALIZE PAGE ON LOAD
 //---------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  loadEvents();
-  loadMenu();
-  initMap();
-  loadProfile();
+    loadEvents();
+    loadMenu();
+    initMap();
+    loadProfile();
 
-  const saveBtn = document.getElementById("save-profile-btn");
-  if (saveBtn) saveBtn.addEventListener("click", saveProfile);
+    const saveBtn = document.getElementById("saveProfile");
+    if (saveBtn) saveBtn.addEventListener("click", saveProfile);
 
-  console.log("All Camp-helf scripts initialized.");
+    console.log("All Camp-helf scripts initialized.");
 });
